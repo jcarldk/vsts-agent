@@ -40,6 +40,8 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Handlers
 
         public NodeHandlerData Data { get; set; }
 
+        private static string TempFile = Path.GetTempFileName();
+
         public async Task RunAsync()
         {
             // Validate args.
@@ -60,6 +62,10 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Handlers
                 IOUtil.CopyDirectory(vsoTaskLibFromExternal, compatVsoTaskLibInWork, ExecutionContext.CancellationToken);
             }
 #endif
+
+            // Create the temp file for logging output for process
+            ExecutionContext.Write(WellKnownTags.Debug, "**** Logging to: " + TempFile);
+
 
             // Update the env dictionary.
             AddInputsToEnvironment();
@@ -96,7 +102,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Handlers
             // however the implementation is added in node 6.x, the implementation in vsts-task-lib is different.
             // node 6.x's implementation takes 2 parameters str.endsWith(searchString[, length]) / str.startsWith(searchString[, length])
             // the implementation vsts-task-lib had only takes one parameter str.endsWith(searchString) / str.startsWith(searchString).
-            // as long as vsts-task-lib be loaded into memory, it will overwrite the implementation node 6.x has, 
+            // as long as vsts-task-lib be loaded into memory, it will overwrite the implementation node 6.x has,
             // so any scirpt that use the second parameter (length) will encounter unexpected result.
             // to avoid customer hit this error, we will modify the file (extensions.js) under vsts-task-lib module folder when customer choose to use Node 6.x
             Trace.Info("Inspect node_modules folder, make sure vsts-task-lib doesn't overwrite String.startsWith/endsWith.");
@@ -135,6 +141,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Handlers
 
         private void OnDataReceived(object sender, ProcessDataReceivedEventArgs e)
         {
+            System.IO.File.AppendAllText(TempFile, e.Data + System.Environment.NewLine);
             // This does not need to be inside of a critical section.
             // The logging queues and command handlers are thread-safe.
             if (!CommandManager.TryProcessCommand(ExecutionContext, e.Data))
