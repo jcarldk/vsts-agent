@@ -15,7 +15,7 @@ LAYOUT_DIR="$SCRIPT_DIR/../_layout"
 DOWNLOAD_DIR="$SCRIPT_DIR/../_downloads/netcore2x"
 PACKAGE_DIR="$SCRIPT_DIR/../_package"
 DOTNETSDK_ROOT="$SCRIPT_DIR/../_dotnetsdk"
-DOTNETSDK_VERSION="2.0.3"
+DOTNETSDK_VERSION="2.1.300"
 DOTNETSDK_INSTALLDIR="$DOTNETSDK_ROOT/$DOTNETSDK_VERSION"
 
 pushd $SCRIPT_DIR
@@ -30,9 +30,20 @@ if [[ (`uname` == "Linux") || (`uname` == "Darwin") ]]; then
     CURRENT_PLATFORM=`echo \`uname\` | awk '{print tolower($0)}'`
 fi
 
-RUNTIME_ID='win-x64'
-if [[ "$CURRENT_PLATFORM" == 'linux' ]]; then
-   RUNTIME_ID='linux-x64'
+if [[ "$CURRENT_PLATFORM" == 'windows' ]]; then
+   RUNTIME_ID='win-x64'
+   if [[ "$PROCESSOR_ARCHITECTURE" == 'x86' ]]; then
+      RUNTIME_ID='win-x84'
+   fi
+elif [[ "$CURRENT_PLATFORM" == 'linux' ]]; then
+   RUNTIME_ID="linux-x64"
+   if command -v uname > /dev/null; then
+        CPU_NAME=$(uname -m)
+        case $CPU_NAME in
+            armv7l) RUNTIME_ID="linux-arm";;
+            aarch64) RUNTIME_ID="linux-arm";;
+        esac
+    fi
 elif [[ "$CURRENT_PLATFORM" == 'darwin' ]]; then
    RUNTIME_ID='osx-x64'
 fi
@@ -41,12 +52,30 @@ if [[ -z "$DEV_RUNTIME" ]]; then
    DEV_RUNTIME="$DEV_CONFIG"
 fi
 
-if [[ ("$DEV_RUNTIME" == 'win-x86') || ("$DEV_RUNTIME" == 'win-x64') || ("$DEV_RUNTIME" == 'win-arm') || ("$DEV_RUNTIME" == 'win-arm64') || ("$DEV_RUNTIME" == 'linux-x86') || ("$DEV_RUNTIME" == 'linux-x64') || ("$DEV_RUNTIME" == 'osx-x64') || ("$DEV_RUNTIME" == 'linux-arm') || ("$DEV_RUNTIME" == 'linux-arm64') ]]; then
+if [[ ("$DEV_RUNTIME" == 'win-x86') || ("$DEV_RUNTIME" == 'win-x64') || ("$DEV_RUNTIME" == 'linux-x64') || ("$DEV_RUNTIME" == 'linux-arm') || ("$DEV_RUNTIME" == 'osx-x64') ]]; then
     RUNTIME_ID="$DEV_CONFIG"
 fi
 
-WINDOWSAGENTSERVICE_PROJFILE="Agent.Service/Windows/AgentService.csproj"
-WINDOWSAGENTSERVICE_BIN="Agent.Service/Windows/bin/$BUILD_CONFIG"
+# Make sure current platform support publish the dotnet runtime
+# Windows can publish win-x86/x64
+# Linux can publish linux-x64/arm
+# OSX can publish osx-x64
+if [[ "$CURRENT_PLATFORM" == 'windows' ]]; then
+   if [[ ("$RUNTIME_ID" != 'win-x86') && ("$RUNTIME_ID" != 'win-x64') ]]; then
+      echo "Failed: Can't build $RUNTIME_ID package $CURRENT_PLATFORM" >&2
+      exit 1
+   fi
+elif [[ "$CURRENT_PLATFORM" == 'linux' ]]; then
+   if [[ ("$RUNTIME_ID" != 'linux-x86') && ("$RUNTIME_ID" != 'linux-arm') ]]; then
+      echo "Failed: Can't build $RUNTIME_ID package $CURRENT_PLATFORM" >&2
+      exit 1
+   fi
+elif [[ "$CURRENT_PLATFORM" == 'darwin' ]]; then
+   if [[ ("$RUNTIME_ID" != 'osx-x86') ]]; then
+      echo "Failed: Can't build $RUNTIME_ID package $CURRENT_PLATFORM" >&2
+      exit 1
+   fi
+fi
 
 function failed()
 {
@@ -195,8 +224,8 @@ export PATH=${DOTNETSDK_INSTALLDIR}:$PATH
 heading "Dotnet SDK Version"
 dotnet --version
 
-heading "Pre-cache external resources for $CURRENT_PLATFORM platform ..."
-bash ./Misc/externals.sh $CURRENT_PLATFORM "Pre-Cache" || checkRC "externals.sh Pre-Cache"
+heading "Pre-cache external resources for $RUNTIME_ID package ..."
+bash ./Misc/externals.sh $RUNTIME_ID "Pre-Cache" || checkRC "externals.sh Pre-Cache"
 
 if [[ "$CURRENT_PLATFORM" == 'windows' ]]; then
     vswhere=`find $DOWNLOAD_DIR -name vswhere.exe | head -1`
