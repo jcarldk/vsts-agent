@@ -8,6 +8,7 @@
 
 DEV_CMD=$1
 DEV_CONFIG=$2
+DEV_RUNTIME=$3
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAYOUT_DIR="$SCRIPT_DIR/../_layout"
@@ -34,6 +35,14 @@ if [[ "$CURRENT_PLATFORM" == 'linux' ]]; then
    RUNTIME_ID='linux-x64'
 elif [[ "$CURRENT_PLATFORM" == 'darwin' ]]; then
    RUNTIME_ID='osx-x64'
+fi
+
+if [[ -z "$DEV_RUNTIME" ]]; then
+   DEV_RUNTIME="$DEV_CONFIG"
+fi
+
+if [[ ("$DEV_RUNTIME" == 'win-x86') || ("$DEV_RUNTIME" == 'win-x64') || ("$DEV_RUNTIME" == 'win-arm') || ("$DEV_RUNTIME" == 'win-arm64') || ("$DEV_RUNTIME" == 'linux-x86') || ("$DEV_RUNTIME" == 'linux-x64') || ("$DEV_RUNTIME" == 'osx-x64') || ("$DEV_RUNTIME" == 'linux-arm') || ("$DEV_RUNTIME" == 'linux-arm64') ]]; then
+    RUNTIME_ID="$DEV_CONFIG"
 fi
 
 WINDOWSAGENTSERVICE_PROJFILE="Agent.Service/Windows/AgentService.csproj"
