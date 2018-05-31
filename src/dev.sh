@@ -139,8 +139,8 @@ function layout ()
         chmod +x ${LAYOUT_DIR}/bin/installdependencies.sh
     fi
 
-    heading "Setup externals folder for $CURRENT_PLATFORM agent's layout"
-    bash ./Misc/externals.sh $CURRENT_PLATFORM || checkRC externals.sh
+    heading "Setup externals folder for $RUNTIME_ID agent's layout"
+    bash ./Misc/externals.sh $RUNTIME_ID || checkRC externals.sh
 }
 
 function runtest ()
