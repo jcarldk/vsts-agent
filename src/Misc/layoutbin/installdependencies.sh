@@ -36,7 +36,7 @@ then
         command -v apt
         if [ $? -eq 0 ]
         then
-            apt update && apt install -y libunwind8 liblttng-ust0 libcurl3 libuuid1 libkrb5-3 zlib1g
+            apt update && apt install -y libunwind8 liblttng-ust0 libuuid1 libkrb5-3 zlib1g
             if [ $? -ne 0 ]
             then
                 echo "'apt' failed with exit code '$?'"
@@ -66,7 +66,7 @@ then
             command -v apt-get
             if [ $? -eq 0 ]
             then
-                apt-get update && apt-get install -y libunwind8 liblttng-ust0 libcurl3 libuuid1 libkrb5-3 zlib1g
+                apt-get update && apt-get install -y libunwind8 liblttng-ust0 libuuid1 libkrb5-3 zlib1g
                 if [ $? -ne 0 ]
                 then
                     echo "'apt-get' failed with exit code '$?'"
@@ -116,7 +116,7 @@ then
                 if [ $? -eq 0 ]
                 then
                     echo "Use compat-openssl10-devel instead of openssl-devel for Fedora 26 (dotnet core requires openssl 1.0.x)"                    
-                    dnf install -y libunwind lttng-ust libcurl compat-openssl10 libuuid krb5-libs zlib libicu
+                    dnf install -y libunwind lttng-ust compat-openssl10 libuuid krb5-libs zlib libicu
                     if [ $? -ne 0 ]
                     then
                         echo "'dnf' failed with exit code '$?'"
@@ -124,7 +124,7 @@ then
                         exit 1
                     fi
                 else
-                    dnf install -y libunwind lttng-ust libcurl openssl-libs libuuid krb5-libs zlib libicu
+                    dnf install -y libunwind lttng-ust openssl-libs libuuid krb5-libs zlib libicu
                     if [ $? -ne 0 ]
                     then
                         echo "'dnf' failed with exit code '$?'"
@@ -141,7 +141,7 @@ then
             command -v yum
             if [ $? -eq 0 ]
             then
-                yum install -y libunwind libcurl openssl-libs libuuid krb5-libs zlib libicu
+                yum install -y libunwind openssl-libs libuuid krb5-libs zlib libicu
                 if [ $? -ne 0 ]
                 then                    
                     echo "'yum' failed with exit code '$?'"
@@ -173,7 +173,7 @@ then
             command -v zypper
             if [ $? -eq 0 ]
             then
-                zypper -n install libunwind lttng-ust libcurl4 libopenssl1_0_0 libuuid1 krb5 zlib libicu52_1
+                zypper -n install libunwind lttng-ust libopenssl1_0_0 libuuid1 krb5 zlib libicu52_1
                 if [ $? -ne 0 ]
                 then
                     echo "'zypper' failed with exit code '$?'"
