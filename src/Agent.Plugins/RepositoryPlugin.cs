@@ -73,7 +73,8 @@ namespace Agent.Plugins.Repository
             var sourceSkipVar = StringUtil.ConvertToBoolean(executionContext.Variables.GetValueOrDefault("agent.source.skip")?.Value);
             if (sourceSkipVar)
             {
-                executionContext.Output($"Skip sync source since 'agent.source.skip=true'.");
+                executionContext.Output($"Skip sync source for repository.");
+                return;
             }
 
             var repoAlias = executionContext.GetInput(Pipelines.PipelineConstants.CheckoutTaskInputs.Repository, true);
