@@ -190,7 +190,6 @@ namespace Agent.Plugins.Repository
             bool useClientCert = false;
             string clientCertPrivateKeyAskPassFile = null;
             bool acceptUntrustedCerts = false;
-            int fetchDepth = 0;
 
             executionContext.Output($"Syncing repository: {repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Name)} ({repository.Type})");
             Uri repositoryUrl = repository.Url;
@@ -234,6 +233,7 @@ namespace Agent.Plugins.Repository
             var agentCert = executionContext.GetCertConfiguration();
             acceptUntrustedCerts = acceptUntrustedCerts || (agentCert?.SkipServerCertificateValidation ?? false);
 
+            int fetchDepth = 0;
             if (!int.TryParse(executionContext.GetInput(Pipelines.PipelineConstants.CheckoutTaskInputs.FetchDepth), out fetchDepth) || fetchDepth < 0)
             {
                 fetchDepth = 0;

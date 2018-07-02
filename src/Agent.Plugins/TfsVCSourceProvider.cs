@@ -426,7 +426,7 @@ namespace Agent.Plugins.Repository
             bool undoShelvesetPendingChanges = StringUtil.ConvertToBoolean(executionContext.TaskVariables.GetValueOrDefault("UndoShelvesetPendingChanges")?.Value);
             if (undoShelvesetPendingChanges)
             {
-                string shelvesetName = executionContext.Variables.GetValueOrDefault("build.gated.shelvesetname")?.Value;
+                string shelvesetName = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Shelveset);
                 executionContext.Debug($"Undo pending changes left by shelveset '{shelvesetName}'.");
 
                 // Create the tf command manager.

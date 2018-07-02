@@ -137,15 +137,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
 
             executionContext.Variables.Set(Constants.Variables.Build.RepoName, Repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Name));
             executionContext.Variables.Set(Constants.Variables.Build.RepoProvider, Repository.Type);
-            executionContext.Variables.Set(Constants.Variables.Build.SourceVersion, Repository.Version);
             executionContext.Variables.Set(Constants.Variables.Build.RepoUri, Repository.Url?.AbsoluteUri);
-
-            var versionInfo = Repository.Properties.Get<Pipelines.VersionInfo>(Pipelines.RepositoryPropertyNames.VersionInfo);
-            if (versionInfo != null)
-            {
-                executionContext.Variables.Set(BuildVariables.SourceVersionAuthor, versionInfo.Author);
-                executionContext.Variables.Set(BuildVariables.SourceVersionMessage, versionInfo.Message);
-            }
 
             var checkoutTask = steps.SingleOrDefault(x => x.IsCheckoutTask()) as Pipelines.TaskStep;
             if (checkoutTask != null)
