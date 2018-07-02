@@ -1,11 +1,6 @@
 #!/bin/bash
 
 # Validate not sudo
-user_id=`id -u`
-if [ $user_id -eq 0 ]; then
-    echo "Must not run interactively with sudo"
-    exit 1
-fi
 
 # Change directory to the script root directory
 # https://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
