@@ -31,13 +31,6 @@ then
         exit 1
     fi
 
-    ldd ./bin/System.Net.Http.Native.so | grep 'not found'
-    if [ $? -eq 0 ]; then
-        echo "Dependencies is missing for Dotnet Core 2.1"
-        echo "Execute ./bin/installdependencies.sh to install any missing Dotnet Core 2.1 dependencies."
-        exit 1
-    fi
-
     if ! [ -x "$(command -v ldconfig)" ]; then        
         LDCONFIG_COMMAND="/sbin/ldconfig"
         if ! [ -x "$LDCONFIG_COMMAND" ]; then
