@@ -116,12 +116,12 @@ then
                 grep -i 'fedora release 27' /etc/fedora-release
                 if [ $? -eq 0 ]
                 then
-                    $useCompatSsl=1
+                    useCompatSsl=1
                 else
                     grep -i 'fedora release 26' /etc/fedora-release
                     if [ $? -eq 0 ]
                     then
-                        $useCompatSsl=1
+                        useCompatSsl=1
                     fi
                 fi       
 
