@@ -122,7 +122,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
             }
 
             // We only support checkout one repository at this time.
-            if (!TrySetPrimaryEndpointAndProviderInfo(executionContext))
+            if (!TrySetPrimaryRepositoryAndProviderInfo(executionContext))
             {
                 throw new Exception(StringUtil.Loc("SupportedRepositoryEndpointNotFound"));
             }
@@ -136,7 +136,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
             }
 
             executionContext.Variables.Set(Constants.Variables.Build.RepoName, Repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Name));
-            executionContext.Variables.Set(Constants.Variables.Build.RepoProvider, Repository.Type);
+            executionContext.Variables.Set(Constants.Variables.Build.RepoProvider, ConvertToLegacyRepositoryType(Repository.Type));
             executionContext.Variables.Set(Constants.Variables.Build.RepoUri, Repository.Url?.AbsoluteUri);
 
             var checkoutTask = steps.SingleOrDefault(x => x.IsCheckoutTask()) as Pipelines.TaskStep;
@@ -191,10 +191,10 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
             executionContext.Variables.Set(Constants.Variables.Build.ArtifactStagingDirectory, Path.Combine(_workDirectory, trackingConfig.ArtifactsDirectory));
             executionContext.Variables.Set(Constants.Variables.Build.RepoLocalPath, Path.Combine(_workDirectory, trackingConfig.SourcesDirectory));
 
-            Repository.Properties.Set<string>("sourcedirectory", Path.Combine(_workDirectory, trackingConfig.SourcesDirectory));
+            Repository.Properties.Set<string>(Pipelines.RepositoryPropertyNames.Path, Path.Combine(_workDirectory, trackingConfig.SourcesDirectory));
         }
 
-        private bool TrySetPrimaryEndpointAndProviderInfo(IExecutionContext executionContext)
+        private bool TrySetPrimaryRepositoryAndProviderInfo(IExecutionContext executionContext)
         {
             // Return the first repository resource and its source provider.
             Trace.Entering();
@@ -212,6 +212,42 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
             }
 
             return false;
+        }
+
+        private string ConvertToLegacyRepositoryType(string pipelineRepositoryType)
+        {
+            if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.Bitbucket, StringComparison.OrdinalIgnoreCase))
+            {
+                return "Bitbucket";
+            }
+            else if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.ExternalGit, StringComparison.OrdinalIgnoreCase))
+            {
+                return "Git";
+            }
+            else if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.Git, StringComparison.OrdinalIgnoreCase))
+            {
+                return "TfsGit";
+            }
+            else if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.GitHub, StringComparison.OrdinalIgnoreCase))
+            {
+                return "GitHub";
+            }
+            else if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.GitHubEnterprise, StringComparison.OrdinalIgnoreCase))
+            {
+                return "GitHubEnterprise";
+            }
+            else if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.Svn, StringComparison.OrdinalIgnoreCase))
+            {
+                return "Svn";
+            }
+            else if (String.Equals(pipelineRepositoryType, Pipelines.RepositoryTypes.Tfvc, StringComparison.OrdinalIgnoreCase))
+            {
+                return "TfsVersionControl";
+            }
+            else
+            {
+                throw new NotSupportedException(pipelineRepositoryType);
+            }
         }
     }
 }

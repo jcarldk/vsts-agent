@@ -141,7 +141,7 @@ namespace Agent.Plugins.Repository
             DefinitionWorkspaceMapping[] definitionMappings = workspaceMappings.Select(x => new DefinitionWorkspaceMapping() { ServerPath = x.ServerPath, LocalPath = x.LocalPath, MappingType = x.Exclude ? DefinitionMappingType.Cloak : DefinitionMappingType.Map }).ToArray();
 
             // Determine the sources directory.
-            string sourcesDirectory = repository.Properties.Get<string>("sourcedirectory");
+            string sourcesDirectory = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Path);
             ArgUtil.NotNullOrEmpty(sourcesDirectory, nameof(sourcesDirectory));
 
             // Attempt to re-use an existing workspace if the command manager supports scorch
@@ -419,6 +419,9 @@ namespace Agent.Plugins.Repository
                 executionContext.Debug($"Remove proxy setting for '{tf.FilePath}' to work through proxy server '{agentProxy.ProxyAddress}'.");
                 tf.CleanupProxySetting();
             }
+
+            // Set intra-task variable for post job cleanup
+            executionContext.SetTaskVariable("repository", repository.Alias);
         }
 
         public async Task PostJobCleanupAsync(AgentTaskPluginExecutionContext executionContext, Pipelines.RepositoryResource repository)
@@ -452,7 +455,7 @@ namespace Agent.Plugins.Repository
                 DefinitionWorkspaceMapping[] definitionMappings = workspaceMappings.Select(x => new DefinitionWorkspaceMapping() { ServerPath = x.ServerPath, LocalPath = x.LocalPath, MappingType = x.Exclude ? DefinitionMappingType.Cloak : DefinitionMappingType.Map }).ToArray();
 
                 // Determine the sources directory.
-                string sourcesDirectory = repository.Properties.Get<string>("sourcedirectory");
+                string sourcesDirectory = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Path);
                 ArgUtil.NotNullOrEmpty(sourcesDirectory, nameof(sourcesDirectory));
 
                 try

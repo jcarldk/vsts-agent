@@ -91,8 +91,9 @@ namespace Agent.Plugins.Repository
 
         public override async Task RunAsync(AgentTaskPluginExecutionContext executionContext, CancellationToken token)
         {
-            var repoAlias = executionContext.GetInput(Pipelines.PipelineConstants.CheckoutTaskInputs.Repository, true);
+            var repoAlias = executionContext.TaskVariables.GetValueOrDefault("repository")?.Value;
             var repo = executionContext.Repositories.Single(x => string.Equals(x.Alias, repoAlias, StringComparison.OrdinalIgnoreCase));
+            ArgUtil.NotNull(repo, nameof(repo));
 
             ISourceProvider sourceProvider = GetSourceProvider(repo.Type);
             await sourceProvider.PostJobCleanupAsync(executionContext, repo);

@@ -198,7 +198,7 @@ namespace Agent.Plugins.Repository
                 throw new InvalidOperationException("Repository url need to be an absolute uri.");
             }
 
-            string targetPath = repository.Properties.Get<string>("sourcedirectory");
+            string targetPath = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Path);
             string sourceBranch = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Ref);
             string sourceVersion = repository.Version;
 
@@ -222,7 +222,7 @@ namespace Agent.Plugins.Repository
             {
                 // the endpoint should either be the SystemVssConnection (id = guild.empty, name = SystemVssConnection)
                 // or a real service endpoint to external service which has a real id
-                endpoint = executionContext.Endpoints.Single(x => (x.Id == Guid.Empty && x.Name == repository.Endpoint.Name) || (x.Id != Guid.Empty && x.Id == repository.Endpoint.Id));
+                endpoint = executionContext.Endpoints.Single(x => (x.Id != Guid.Empty && x.Id == repository.Endpoint.Id) || (x.Id == Guid.Empty && x.Name == repository.Endpoint.Name));
             }
 
             if (endpoint.Data.TryGetValue(EndpointData.AcceptUntrustedCertificates, out string endpointAcceptUntrustedCerts))
@@ -983,6 +983,8 @@ namespace Agent.Plugins.Repository
             }
 
             // Set intra-task variable for post job cleanup
+            executionContext.SetTaskVariable("repository", repository.Alias);
+
             if (selfManageGitCreds)
             {
                 // no needs to cleanup creds, since customer choose to manage creds themselves.
@@ -1020,11 +1022,10 @@ namespace Agent.Plugins.Repository
             ArgUtil.NotNull(executionContext, nameof(executionContext));
             ArgUtil.NotNull(repository, nameof(repository));
 
-            executionContext.Output($"Cleaning any cached credential from repository: {repository.Properties.Get<string>("name")} (Git)");
+            executionContext.Output($"Cleaning any cached credential from repository: {repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Name)} ({repository.Type})");
 
             Uri repositoryUrl = repository.Url;
-            //string targetPath = repository.Properties.Get<string>("sourcedirectory");
-            string targetPath = executionContext.Variables.GetValueOrDefault("build.sourcesdirectory")?.Value;
+            string targetPath = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Path);
 
             executionContext.Debug($"Repository url={repositoryUrl}");
             executionContext.Debug($"targetPath={targetPath}");

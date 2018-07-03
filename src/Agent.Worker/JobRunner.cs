@@ -208,7 +208,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker
                     VarUtil.ExpandEnvironmentVariables(HostContext, target: endpoint.Data);
                 }
 
-                // Expand the repository workspace mapping property values.
+                // Expand the repository property values.
                 foreach (var repository in jobContext.Repositories)
                 {
                     Dictionary<string, string> expandProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

@@ -422,22 +422,34 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
             {
                 return cleanOption.Value;
             }
-            
-            if (string.Equals(workspace?.Clean, PipelineConstants.WorkspaceCleanOptions.All, StringComparison.OrdinalIgnoreCase))
+
+            if (workspace == null)
             {
-                return BuildCleanOption.All;
-            }
-            else if (string.Equals(workspace?.Clean, PipelineConstants.WorkspaceCleanOptions.Resources, StringComparison.OrdinalIgnoreCase))
-            {
-                return BuildCleanOption.Source;
-            }
-            else if (string.Equals(workspace?.Clean, PipelineConstants.WorkspaceCleanOptions.Outputs, StringComparison.OrdinalIgnoreCase))
-            {
-                return BuildCleanOption.Binary;
+                return BuildCleanOption.None;
             }
             else
             {
-                return BuildCleanOption.None;
+                Dictionary<string, string> workspaceClean = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                workspaceClean["clean"] = workspace.Clean;
+                executionContext.Variables.ExpandValues(target: workspaceClean);
+                VarUtil.ExpandEnvironmentVariables(HostContext, target: workspaceClean);
+                string expandedClean = workspaceClean["clean"];
+                if (string.Equals(expandedClean, PipelineConstants.WorkspaceCleanOptions.All, StringComparison.OrdinalIgnoreCase))
+                {
+                    return BuildCleanOption.All;
+                }
+                else if (string.Equals(expandedClean, PipelineConstants.WorkspaceCleanOptions.Resources, StringComparison.OrdinalIgnoreCase))
+                {
+                    return BuildCleanOption.Source;
+                }
+                else if (string.Equals(expandedClean, PipelineConstants.WorkspaceCleanOptions.Outputs, StringComparison.OrdinalIgnoreCase))
+                {
+                    return BuildCleanOption.Binary;
+                }
+                else
+                {
+                    return BuildCleanOption.None;
+                }
             }
         }
     }
