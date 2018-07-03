@@ -112,11 +112,23 @@ then
             command -v dnf
             if [ $? -eq 0 ]
             then
-                grep -i 'fedora release 26' /etc/fedora-release
+                useCompatSsl=0
+                grep -i 'fedora release 27' /etc/fedora-release
                 if [ $? -eq 0 ]
                 then
-                    echo "Use compat-openssl10-devel instead of openssl-devel for Fedora 26 (dotnet core requires openssl 1.0.x)"                    
-                    dnf install -y lttng-ust compat-openssl10 krb5-libs zlib libicu
+                    $useCompatSsl=1
+                else
+                    grep -i 'fedora release 26' /etc/fedora-release
+                    if [ $? -eq 0 ]
+                    then
+                        $useCompatSsl=1
+                    fi
+                fi       
+
+                if [ $useCompatSsl -eq 1 ]
+                then
+                    echo "Use compat-openssl10-devel instead of openssl-devel for Fedora 26/27 (dotnet core requires openssl 1.0.x)"                    
+                    dnf install -y compat-openssl10
                     if [ $? -ne 0 ]
                     then
                         echo "'dnf' failed with exit code '$?'"
@@ -124,14 +136,22 @@ then
                         exit 1
                     fi
                 else
-                    dnf install -y lttng-ust openssl-libs krb5-libs zlib libicu
+                    dnf install -y openssl-libs
                     if [ $? -ne 0 ]
                     then
                         echo "'dnf' failed with exit code '$?'"
                         print_errormessage
                         exit 1
                     fi
-                fi                
+                fi       
+
+                dnf install -y lttng-ust krb5-libs zlib libicu
+                if [ $? -ne 0 ]
+                then
+                    echo "'dnf' failed with exit code '$?'"
+                    print_errormessage
+                    exit 1
+                fi         
             else
                 echo "Can not find 'dnf'"
                 print_errormessage
