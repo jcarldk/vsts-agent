@@ -95,7 +95,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker.Build
             if (serverPath.StartsWith("^/"))
             {
                 // Convert the server path to the relative one using SVN work copy mappings
-                string sourcesDirectory = repository.Properties.Get<string>(RepositoryPropertyNames.Path);
+                string sourcesDirectory = repository.Properties.Get<string>("path");
                 localPath = svn.ResolveServerPath(serverPath, sourcesDirectory);
             }
             else

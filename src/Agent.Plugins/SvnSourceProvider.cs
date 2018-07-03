@@ -27,7 +27,7 @@ namespace Agent.Plugins.Repository
             svn.Init(executionContext, repository, cancellationToken);
 
             // Determine the sources directory.
-            string sourceDirectory = repository.Properties.Get<string>(Pipelines.RepositoryPropertyNames.Path);
+            string sourceDirectory = repository.Properties.Get<string>("path");
             executionContext.Debug($"sourceDirectory={sourceDirectory}");
             ArgUtil.NotNullOrEmpty(sourceDirectory, nameof(sourceDirectory));
 
